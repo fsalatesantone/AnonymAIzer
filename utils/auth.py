@@ -38,8 +38,8 @@ def require_login() -> str | None:
         for email in secret_section("authorized_emails").get("emails", [])
     }
 
-    if not authorized_emails:
-        st.error("Elenco email autorizzate non configurato.")
+    if not authorized_emails and not authorized_domains:
+        st.error("Nessuna email o dominio autorizzato configurato.")
         st.stop()
 
     # Verifica configurazione OAuth
@@ -104,7 +104,20 @@ def require_login() -> str | None:
     # Verifica email
     user_email = str(st.user.get("email", "") or "").strip().lower()
 
-    if user_email not in authorized_emails:
+    # Domini autorizzati
+    authorized_domains = {
+        str(domain).strip().lower().lstrip("@")
+        for domain in secret_section("authorized_emails").get("domains", [])
+    }
+
+    # Verifica email e dominio
+    email_domain = user_email.rsplit("@", 1)[-1] if "@" in user_email else ""
+    is_authorized = (
+        user_email in authorized_emails
+        or email_domain in authorized_domains
+    )
+
+    if not is_authorized:
         st.error(f"L'account {user_email} non è autorizzato.")
 
         if st.button("Esci"):
