@@ -49,14 +49,56 @@ def require_login() -> str | None:
 
     # Login Google
     if not st.user.is_logged_in:
-        st.title("AnonymAIzer")
-        st.markdown("#### Centro Studi Tagliacarne")
-        st.write("Accedi con il tuo account Google autorizzato.")
+        st.markdown("""
+            <style>
+            :root {
+                --primary-color: #1769AA;
+            }
 
-        if st.button("Accedi con Google", type="primary",
-                     use_container_width=True):
-            st.login()
+            div.stButton > button[kind="primary"] {
+                background-color: #1769AA !important;
+                border-color: #1769AA !important;
+                color: white !important;
+            }
 
+            div.stButton > button[kind="primary"]:hover {
+                background-color: #10558B !important;
+                border-color: #10558B !important;
+                color: white !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        st.write("")
+        st.write("")
+
+        # Pagina login centrata
+        col_left, col_center, col_right = st.columns([1, 1.4, 1])
+
+        with col_center:
+            from pathlib import Path
+            logo_path = (Path(__file__).resolve().parent.parent / "img" / "logo.png")
+
+            if logo_path.exists():
+                st.image(str(logo_path), width="stretch")
+            else:
+                st.title("AnonymAIzer")
+
+            st.markdown(
+                "<h3 style='text-align:center;'>"
+                "Centro Studi Tagliacarne"
+                "</h3>", unsafe_allow_html=True)
+
+            st.markdown(
+                "<p style='text-align:center; color:#64748b;'>"
+                "Accedi con il tuo account Google autorizzato."
+                "</p>", unsafe_allow_html=True)
+
+            # Pulsante compatto e centrato
+            b1, b2, b3 = st.columns([1, 2, 1])
+            with b2:
+                if st.button("Accedi con Google", type="primary", use_container_width=True):
+                    st.login()
         st.stop()
 
     # Verifica email

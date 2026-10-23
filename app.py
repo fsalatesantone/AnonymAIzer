@@ -37,7 +37,7 @@ DETECTORS = {
     'CF': re.compile(r'\b[A-Z]{6}\d{2}[A-EHLMPRST][0-7]\d[A-Z]\d{3}[A-Z]\b', re.I),
 }
 
-favicon = ROOT / 'assets' / 'favicon.png'
+favicon = ROOT / 'img' / 'favicon.png'
 st.set_page_config(page_title='AnonymAIzer | Anonimizzazione locale',
                    page_icon=str(favicon) if favicon.is_file() else '🔒', layout='wide')
 
@@ -48,16 +48,31 @@ st.markdown('''<style>
 :root { --anony-blue: #1769aa; --anony-blue-dark: #115486; }
 .block-container{padding-top:2rem;max-width:1200px}
 [data-testid="stMetric"]{border:1px solid #d9e4ee;border-radius:12px;padding:12px}
-/* Elementi selezionati nel multiselect della sidebar. */
-[data-baseweb="tag"] { background-color: #dceefa !important; color: #145a91 !important; }
-[data-baseweb="tag"] span { color: #145a91 !important; }
-[data-baseweb="tag"] [role="button"], [data-baseweb="tag"] svg {
-  color: #145a91 !important; fill: #145a91 !important;
-}
 /* Comandi primari e indicatori di selezione. */
 button[kind="primary"] { background: var(--anony-blue) !important; border-color: var(--anony-blue) !important; }
 button[kind="primary"]:hover { background: var(--anony-blue-dark) !important; border-color: var(--anony-blue-dark) !important; }
-input[type="radio"], input[type="checkbox"] { accent-color: var(--anony-blue); }
+/* Checkbox e radio Streamlit/BaseWeb: blu al posto dell'accento rosso. */
+input[type="radio"], input[type="checkbox"] { accent-color: var(--anony-blue) !important; }
+[data-testid="stCheckbox"] label[data-baseweb="checkbox"] span:first-child,
+[data-testid="stRadio"] label[data-baseweb="radio"] span:first-child {
+  accent-color: var(--anony-blue) !important;
+}
+[data-testid="stCheckbox"] input:checked + div,
+[data-testid="stRadio"] input:checked + div {
+  background-color: var(--anony-blue) !important;
+  border-color: var(--anony-blue) !important;
+}
+[data-testid="stCheckbox"] input:checked + div svg {
+  fill: white !important;
+}
+[data-testid="stRadio"] input:checked + div div {
+  background-color: white !important;
+}
+/* Ulteriore compatibilita con i controlli BaseWeb. */
+[data-testid="stCheckbox"] [aria-checked="true"] > div,
+[data-testid="stRadio"] [aria-checked="true"] > div {
+  border-color: var(--anony-blue) !important;
+}
 </style>''', unsafe_allow_html=True)
 
 @st.cache_resource(show_spinner='Caricamento di Rizzo-PII in corso...')
@@ -221,7 +236,7 @@ if 'output' not in st.session_state:
     st.session_state.count = 0
     st.session_state.source_name = 'testo'
 
-logo = ROOT / 'assets' / 'logo.png'
+logo = ROOT / 'img' / 'logo.png'
 if logo.exists():
     st.image(str(logo), width=380)
 st.caption('Anonimizza testi e proteggi i dati personali con AI. I testi sono elaborati sul server che ospita l’app.')
@@ -254,10 +269,13 @@ with st.sidebar:
                 all_tags.append(tag)
     except (OSError, ValueError, TypeError):
         pass
-    selected = st.multiselect('Seleziona le categorie', options=all_tags,
-                              default=all_tags,
-                              format_func=lambda tag: f'{LABELS.get(tag, tag)} ({tag})',
-                              help='All’apertura tutte le categorie sono selezionate, comprese città e organizzazioni.')
+    # Checkbox individuali: tutte attive al primo avvio della sessione.
+    # Le chiavi persistono nei rerun e permettono di mantenere le scelte dell'utente.
+    with st.container(height=355, border=True):
+        selected = [
+            tag for tag in all_tags
+            if st.checkbox(LABELS.get(tag, tag), value=True, key=f'pii_category_{tag}')
+        ]
     st.info('Su Streamlit Community Cloud i documenti vengono inviati al server cloud prima dell’anonimizzazione. Per questa fase usa solo testi sintetici.')
     st.caption(f'Modello Rizzo-PII 0.3B · CPU · {"Disco locale" if USE_LOCAL_MODEL else "Hugging Face / cache cloud"}')
     try:
