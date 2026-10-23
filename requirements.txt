@@ -4,3 +4,9 @@ huggingface_hub>=0.27
 safetensors>=0.4
 torch>=2.2
 Authlib>=1.3.2
+python-docx
+reportlab
+PyMuPDF
+pandas
+psutil
+httpx
