@@ -242,7 +242,6 @@ with st.sidebar:
         st.caption(f'Accesso: {user_email}')
         if st.button('Esci', key='logout_anonymaizer'):
             st.logout()
-    st.header('Impostazioni')
     st.subheader('Categorie da anonimizzare')
     all_tags = list(LABELS)
     # Include anche eventuali nuove etichette presenti nella configurazione del modello.
@@ -261,7 +260,6 @@ with st.sidebar:
             tag for tag in all_tags
             if st.checkbox(LABELS.get(tag, tag), value=True, key=f'pii_category_{tag}')
         ]
-    st.info('Su Streamlit Community Cloud i documenti vengono inviati al server cloud prima dell’anonimizzazione. Per questa fase usa solo testi sintetici.')
     st.caption(f'Modello Rizzo-PII 0.3B · CPU · {"Disco locale" if USE_LOCAL_MODEL else "Hugging Face / cache cloud"}')
     try:
         import psutil
