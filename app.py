@@ -43,37 +43,22 @@ st.set_page_config(page_title='AnonymAIzer | Anonimizzazione locale',
 
 # Proteggi la pagina PRIMA di leggere documenti o caricare il modello.
 user_email = require_login()
-st.markdown('''<style>
-/* AnonymAIzer: palette blu, anche per le etichette selezionate. */
-:root { --anony-blue: #1769aa; --anony-blue-dark: #115486; }
-.block-container{padding-top:2rem;max-width:1200px}
-[data-testid="stMetric"]{border:1px solid #d9e4ee;border-radius:12px;padding:12px}
-/* Comandi primari e indicatori di selezione. */
-button[kind="primary"] { background: var(--anony-blue) !important; border-color: var(--anony-blue) !important; }
-button[kind="primary"]:hover { background: var(--anony-blue-dark) !important; border-color: var(--anony-blue-dark) !important; }
-/* Checkbox e radio Streamlit/BaseWeb: blu al posto dell'accento rosso. */
-input[type="radio"], input[type="checkbox"] { accent-color: var(--anony-blue) !important; }
-[data-testid="stCheckbox"] label[data-baseweb="checkbox"] span:first-child,
-[data-testid="stRadio"] label[data-baseweb="radio"] span:first-child {
-  accent-color: var(--anony-blue) !important;
+st.markdown("""
+<style>
+/* Impostazioni generali del layout */
+.block-container {
+    padding-top: 2rem;
+    max-width: 1200px;
 }
-[data-testid="stCheckbox"] input:checked + div,
-[data-testid="stRadio"] input:checked + div {
-  background-color: var(--anony-blue) !important;
-  border-color: var(--anony-blue) !important;
+
+/* Riquadri delle metriche */
+[data-testid="stMetric"] {
+    border: 1px solid #d9e4ee;
+    border-radius: 12px;
+    padding: 12px;
 }
-[data-testid="stCheckbox"] input:checked + div svg {
-  fill: white !important;
-}
-[data-testid="stRadio"] input:checked + div div {
-  background-color: white !important;
-}
-/* Ulteriore compatibilita con i controlli BaseWeb. */
-[data-testid="stCheckbox"] [aria-checked="true"] > div,
-[data-testid="stRadio"] [aria-checked="true"] > div {
-  border-color: var(--anony-blue) !important;
-}
-</style>''', unsafe_allow_html=True)
+</style>
+""", unsafe_allow_html=True)
 
 @st.cache_resource(show_spinner='Caricamento di Rizzo-PII in corso...')
 def load_model(model_path: str, revision: str | None):
