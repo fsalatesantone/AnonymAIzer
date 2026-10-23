@@ -1,0 +1,5 @@
+streamlit>=1.37,<2
+transformers>=4.49,<6
+huggingface_hub>=0.27
+safetensors>=0.4
+torch>=2.2

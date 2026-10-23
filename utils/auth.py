@@ -1,0 +1,73 @@
+
+"""
+Autenticazione Google
+
+Locale: LOCAL_DEV=true -> bypass autenticazione.
+Produzione: login Google e controllo email autorizzate.
+"""
+
+from __future__ import annotations
+
+import os
+import streamlit as st
+
+
+LOCAL_DEV = os.getenv("LOCAL_DEV", "false").strip().lower() == "true"
+
+
+def secret_section(name: str) -> dict:
+    try:
+        return dict(st.secrets.get(name, {}))
+    except Exception:
+        return {}
+
+
+def auth_enabled() -> bool:
+    return not LOCAL_DEV
+
+
+def require_login() -> str | None:
+
+    # Ambiente locale di sviluppo
+    if LOCAL_DEV:
+        return "f.salatesantone@gmail.com"
+
+    # Email autorizzate configurate in Streamlit Secrets
+    authorized_emails = {
+        str(email).strip().lower()
+        for email in secret_section("authorized_emails").get("emails", [])
+    }
+
+    if not authorized_emails:
+        st.error("Elenco email autorizzate non configurato.")
+        st.stop()
+
+    # Verifica configurazione OAuth
+    if not secret_section("auth"):
+        st.error("Autenticazione Google non configurata nei Secrets.")
+        st.stop()
+
+    # Login Google
+    if not st.user.is_logged_in:
+        st.title("AnonymAIzer")
+        st.markdown("#### Centro Studi Tagliacarne")
+        st.write("Accedi con il tuo account Google autorizzato.")
+
+        if st.button("Accedi con Google", type="primary",
+                     use_container_width=True):
+            st.login()
+
+        st.stop()
+
+    # Verifica email
+    user_email = str(st.user.get("email", "") or "").strip().lower()
+
+    if user_email not in authorized_emails:
+        st.error(f"L'account {user_email} non è autorizzato.")
+
+        if st.button("Esci"):
+            st.logout()
+
+        st.stop()
+
+    return user_email
